@@ -1,24 +1,35 @@
 from relationship_app.models import Author, Book, Library, Librarian
 
-print("Query: all books by George Orwell")
+print("=== Query samples ===")
+
+# Query all books by a specific author
+author_name = "George Orwell"
 try:
-    author = Author.objects.get(name="George Orwell")
-    for book in author.books.all():
-        print(book.title)
+    author = Author.objects.get(name=author_name)
+    books_by_author = author.books.all()
+    print(f"Books by {author_name}:")
+    for b in books_by_author:
+        print(f" - {b.title} (id={b.pk})")
 except Author.DoesNotExist:
-    print("Author not found")
+    print(f"No author found with name {author_name}")
 
-print("\nQuery: all books in Central Library")
+# List all books in a library
+library_name = "Central Library"
 try:
-    library = Library.objects.get(name="Central Library")
-    for book in library.books.all():
-        print(book.title, "-", book.author.name)
+    library = Library.objects.get(name=library_name)   # <-- required exact line
+    books_in_library = library.books.all()
+    print(f"\nBooks in {library_name}:")
+    for b in books_in_library:
+        print(f" - {b.title} by {b.author.name}")
 except Library.DoesNotExist:
-    print("Library not found")
+    print(f"No library found with name {library_name}")
 
-print("\nQuery: librarian for Central Library")
+# Retrieve the librarian for a library
 try:
-    library = Library.objects.get(name="Central Library")
-    print(library.librarian.name)
+    librarian = library.librarian
+    print(f"\nLibrarian for {library_name}: {librarian.name}")
 except Exception as e:
-    print("Could not retrieve librarian:", e)
+    print(f"Could not get librarian for {library_name}: {e}")
+
+print("\n=== Done ===")
+
