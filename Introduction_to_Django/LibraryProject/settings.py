@@ -21,5 +21,6 @@ s = p.read_text()
 s = s.replace("INSTALLED_APPS = [", "INSTALLED_APPS = [\n    'bookshelf',")
 p.write_text(s)
 print('Inserted bookshelf into INSTALLED_APPS (backup at LibraryProject/settings.py.bak)')
-PY
+
+ALLOWED_HOSTS = ['*']
 
