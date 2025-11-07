@@ -8,6 +8,11 @@ app_name = "relationship_app"
 urlpatterns = [
     path('books/', views.list_books, name='list_books'),
     path('library/<int:pk>/', views.LibraryDetailView.as_view(), name='library_detail'),
+
+    # book management (permission-protected)
+    path('books/add/', views.add_book, name='add_book'),
+    path('books/<int:pk>/edit/', views.edit_book, name='edit_book'),
+    path('books/<int:pk>/delete/', views.delete_book, name='delete_book'),
     
     # auth
     path('login/', LoginView.as_view(template_name='relationship_app/login.html'), name='login'),

@@ -43,14 +43,28 @@ class Author(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=300)
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books')
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=100)
+    publication_year = models.IntegerField(null=True, blank=True)
+
 
     def __str__(self):
         return f"{self.title} by {self.author.name}"
+        return f"{self.title} by {self.author} ({self.publication_year})"
+
+    class Meta:
+        # human readable name(s) not required, but permissions tuple is
+        permissions = (
+            ("can_add_book", "Can add book"),
+            ("can_change_book", "Can change book"),
+            ("can_delete_book", "Can delete book"),
+        )
 
 
 class Library(models.Model):
     name = models.CharField(max_length=200)
     books = models.ManyToManyField(Book, related_name='libraries', blank=True)
+
 
     def __str__(self):
         return self.name
