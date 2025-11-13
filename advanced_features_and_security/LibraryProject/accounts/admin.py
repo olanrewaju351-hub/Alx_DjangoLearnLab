@@ -1,21 +1,24 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
-from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
     model = CustomUser
-
-    # add the new fields to admin display and fieldsets
     list_display = ('username', 'email', 'is_staff', 'is_active')
-    fieldsets = UserAdmin.fieldsets + (
-        ('Extra', {'fields': ('date_of_birth', 'profile_photo')}),
+    list_filter = ('is_staff', 'is_active')
+    fieldsets = (
+        (None, {'fields': ('username', 'email', 'password')}),
+        ('Personal Info', {'fields': ('date_of_birth', 'profile_photo')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
     )
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Extra', {'fields': ('date_of_birth', 'profile_photo')}),
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'password1', 'password2', 'is_staff', 'is_active')}
+        ),
     )
+    search_fields = ('username', 'email')
+    ordering = ('username',)
 
 admin.site.register(CustomUser, CustomUserAdmin)
 
