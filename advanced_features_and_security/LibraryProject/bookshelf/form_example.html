@@ -1,0 +1,7 @@
+<!-- bookshelf/templates/bookshelf/form_example.html -->
+<form method="post" action="{% url 'bookshelf:add_book' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Save</button>
+</form>
+
