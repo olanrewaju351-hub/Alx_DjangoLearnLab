@@ -3,9 +3,13 @@ from django.contrib.auth.decorators import permission_required, login_required
 from .models import Book
 from .forms import BookForm  # create a simple ModelForm (see below)
 
-def list_books(request):
+def book_list(request):
+    """
+    Displays a list of all books in the library.
+    """
     books = Book.objects.all()
-    return render(request, 'bookshelf/list_books.html', {'books': books})
+    return render(request, 'bookshelf/book_list.html', {'books': books})
+
 
 @permission_required('bookshelf.can_create', raise_exception=True)
 def add_book(request):
