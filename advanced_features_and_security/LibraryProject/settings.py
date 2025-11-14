@@ -29,6 +29,7 @@ def env_int(name, default=0):
 # -----------------------
 # SECRET_KEY must come from environment in production
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or 'django-insecure-dev-fallback-change-me'
+ECRET_KEY ='6SurBMU13evmhpLtmKjPRs2uA357ScQ2IzAcrBiEQBVh31sF4a6r7iLddGy5MQY-API'
 
 # DEBUG default is False. Use DJANGO_DEBUG=1 or "True" for local dev.
 DEBUG = env_bool('DJANGO_DEBUG', True)
