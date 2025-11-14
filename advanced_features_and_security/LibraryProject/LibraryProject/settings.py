@@ -127,3 +127,58 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# --- Security hardening settings (use env vars in production) ---
+import os
+
+# Enable browser XSS filtering
+SECURE_BROWSER_XSS_FILTER = True
+
+# Prevent the site from being framed (mitigates clickjacking)
+X_FRAME_OPTIONS = "DENY"
+
+# Prevent content type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Ensure cookies are only sent over HTTPS in production.
+# Set DJANGO_SECURE_COOKIES=True in your production environment.
+_cs = os.environ.get('DJANGO_SECURE_COOKIES', 'False') == 'True'
+CSRF_COOKIE_SECURE = _cs
+SESSION_COOKIE_SECURE = _cs
+
+# Optional: additional cookie hardening
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # leave False unless you have a JS-safe CSRF alternative
+# --- end security block ---
+
+
+# Env-driven security configuration (added automatically)
+import os
+
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).lower() in ('1','true','yes')
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-development-key-please-change')
+
+DEBUG = env_bool('DJANGO_DEBUG', True)
+
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+
+SECURE_COOKIES = env_bool('DJANGO_SECURE_COOKIES', False)
+SESSION_COOKIE_SECURE = SECURE_COOKIES
+CSRF_COOKIE_SECURE = SECURE_COOKIES
+
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+SECURE_SSL_REDIRECT = env_bool('DJANGO_SECURE_SSL_REDIRECT', False)
+
+SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_SECURE_HSTS_SECONDS', 0))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', True)
+SECURE_HSTS_PRELOAD = env_bool('DJANGO_SECURE_HSTS_PRELOAD', False)

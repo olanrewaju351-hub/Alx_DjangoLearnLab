@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-AUTH_USER_MODEL = 'bookshelf.CustomUser'
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 
 MIDDLEWARE = [
@@ -127,3 +127,28 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# --- Security hardening settings (use env vars in production) ---
+import os
+
+# Enable browser XSS filtering
+SECURE_BROWSER_XSS_FILTER = True
+
+# Prevent the site from being framed (mitigates clickjacking)
+X_FRAME_OPTIONS = "DENY"
+
+# Prevent content type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Ensure cookies are only sent over HTTPS in production.
+# Set DJANGO_SECURE_COOKIES=True in your production environment.
+_cs = os.environ.get('DJANGO_SECURE_COOKIES', 'False') == 'True'
+CSRF_COOKIE_SECURE = _cs
+SESSION_COOKIE_SECURE = _cs
+
+# Optional: additional cookie hardening
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # leave False unless you have a JS-safe CSRF alternative
+# --- end security block ---
