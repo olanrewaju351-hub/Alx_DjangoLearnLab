@@ -3,7 +3,22 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Enforce HTTPS redirects
+
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).lower() in ("1", "true", "yes")
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')  # no default in prod
+if not SECRET_KEY:
+    # fallback for local dev; DO NOT use in production
+    SECRET_KEY = '6SurBMU13evmhpLtmKjPRs2uA357ScQ2IzAcrBiEQBVh31sF4a6r7iLddGy5MQY-API'
+
+# DEBUG: default to False for safety; enable in dev via env var
+DEBUG = env_bool('DJANGO_DEBUG', False)
+
+# Hosts - set explicitly in production
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+
+# Force HTTPS
 SECURE_SSL_REDIRECT = True
 
 # HTTP Strict Transport Security (HSTS)
@@ -23,20 +38,6 @@ SECURE_BROWSER_XSS_FILTER = True
 # If behind a proxy/load balancer
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-
-def env_bool(name, default=False):
-    return os.environ.get(name, str(default)).lower() in ("1", "true", "yes")
-
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')  # no default in prod
-if not SECRET_KEY:
-    # fallback for local dev; DO NOT use in production
-    SECRET_KEY = '6SurBMU13evmhpLtmKjPRs2uA357ScQ2IzAcrBiEQBVh31sF4a6r7iLddGy5MQY-API'
-
-# DEBUG: default to False for safety; enable in dev via env var
-DEBUG = env_bool('DJANGO_DEBUG', False)
-
-# Hosts - set explicitly in production
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Force SSL redirect (enable in production when HTTPS is available)
 SECURE_SSL_REDIRECT = env_bool('DJANGO_SECURE_SSL_REDIRECT', True)
