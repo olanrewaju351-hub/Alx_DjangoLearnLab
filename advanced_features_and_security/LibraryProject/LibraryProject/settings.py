@@ -200,3 +200,5 @@ CSRF_COOKIE_SECURE = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 # --- end appended HSTS block ---
+# --- Proxy SSL header (ensures Django recognizes requests forwarded by reverse proxy) ---
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
