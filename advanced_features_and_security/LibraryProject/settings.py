@@ -24,6 +24,22 @@ def env_int(name, default=0):
     except (TypeError, ValueError):
         return default
 
+# -------------------- SECURITY SETTINGS --------------------
+SECURE_SSL_REDIRECT = True
+
+# HSTS (Strict Transport Security)
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Secure cookies
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Browser security headers
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+
 # -----------------------
 # SECRET / DEBUG / HOSTS
 # -----------------------
