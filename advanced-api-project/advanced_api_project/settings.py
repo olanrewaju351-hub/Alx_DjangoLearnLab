@@ -39,7 +39,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',   # Django REST Framework
     'api',              # our API app
+    'django_filters',
 ]
+
+# REST framework configuration for filtering/searching/ordering
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ],
+    # you can keep or define DEFAULT_AUTHENTICATION_CLASSES, DEFAULT_PERMISSION_CLASSES etc.
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
