@@ -49,9 +49,9 @@ class BookAPITestCase(APITestCase):
 
     def test_list_books_returns_all(self):
         """GET /api/books/ should return list of books and 200 OK"""
-        resp = self.client.get(self.list_url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = resp.json()
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
         # Expect at least the 3 sample books
         titles = [b['title'] for b in data]
         self.assertIn(self.book1.title, titles)
@@ -60,41 +60,41 @@ class BookAPITestCase(APITestCase):
 
     def test_filter_by_publication_year(self):
         """Filtering by publication_year should return matching books"""
-        resp = self.client.get(self.list_url, {'publication_year': 1949})
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = resp.json()
+        response = self.client.get(self.list_url, {'publication_year': 1949})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['title'], '1984')
 
     def test_search_by_title(self):
         """Search endpoint should support partial matching on title"""
-        resp = self.client.get(self.list_url, {'search': 'Animal'})
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = resp.json()
+        response = self.client.get(self.list_url, {'search': 'Animal'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['title'], 'Animal Farm')
 
     def test_ordering_by_publication_year(self):
         """Ordering should sort results by publication_year"""
-        resp = self.client.get(self.list_url, {'ordering': 'publication_year'})
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = resp.json()
+        response = self.client.get(self.list_url, {'ordering': 'publication_year'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
         years = [b['publication_year'] for b in data]
         # Check ascending ordering
         self.assertEqual(years, sorted(years))
 
         # descending
-        resp2 = self.client.get(self.list_url, {'ordering': '-publication_year'})
-        data2 = resp2.json()
+        response2 = self.client.get(self.list_url, {'ordering': '-publication_year'})
+        data2 = response2.data
         years2 = [b['publication_year'] for b in data2]
         self.assertEqual(years2, sorted(years2, reverse=True))
 
     def test_retrieve_book_detail(self):
         """GET /api/books/<pk>/ returns individual book"""
         url = reverse('book-detail', args=[self.book1.pk])
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = resp.json()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
         self.assertEqual(data['title'], '1984')
         self.assertEqual(data['publication_year'], 1949)
         # author is represented by id or nested representation depending on serializer
@@ -103,15 +103,15 @@ class BookAPITestCase(APITestCase):
     def test_create_book_requires_authentication(self):
         """Unauthenticated POST to create should be forbidden (401 or 403)"""
         payload = {'title': 'New Book', 'publication_year': 2020, 'author': self.author.id}
-        resp = self.client.post(self.create_url, payload, format='json')
-        self.assertIn(resp.status_code, (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN))
+        response = self.client.post(self.create_url, payload, format='json')
+        self.assertIn(response.status_code, (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN))
 
     def test_create_book_authenticated(self):
         """Authenticated user can create a book"""
         payload = {'title': 'New Book', 'publication_year': 2020, 'author': self.author.id}
-        resp = self.auth_client.post(self.create_url, payload, format='json')
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        data = resp.json()
+        response = self.auth_client.post(self.create_url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = response.data
         self.assertEqual(data['title'], 'New Book')
         self.assertEqual(data['publication_year'], 2020)
 
@@ -119,8 +119,8 @@ class BookAPITestCase(APITestCase):
         """Authenticated user can update a book (PUT)"""
         url = reverse('book-update', args=[self.book1.pk])
         payload = {'title': '1984 - updated', 'publication_year': 1949, 'author': self.author.id}
-        resp = self.auth_client.put(url, payload, format='json')
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        response = self.auth_client.put(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.book1.refresh_from_db()
         self.assertEqual(self.book1.title, '1984 - updated')
 
@@ -128,23 +128,23 @@ class BookAPITestCase(APITestCase):
         """Authenticated user can partially update a book (PATCH)"""
         url = reverse('book-update', args=[self.book2.pk])
         payload = {'title': 'Animal Farm (edited)'}
-        resp = self.auth_client.patch(url, payload, format='json')
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        response = self.auth_client.patch(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.book2.refresh_from_db()
         self.assertEqual(self.book2.title, 'Animal Farm (edited)')
 
     def test_delete_book_requires_authentication(self):
         """Unauthenticated delete should fail"""
         url = reverse('book-delete', args=[self.book3.pk])
-        resp = self.client.delete(url)
-        self.assertIn(resp.status_code, (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN))
+        response = self.client.delete(url)
+        self.assertIn(response.status_code, (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN))
 
     def test_delete_book_authenticated(self):
         """Authenticated user can delete a book"""
         url = reverse('book-delete', args=[self.book3.pk])
-        resp = self.auth_client.delete(url)
+        response = self.auth_client.delete(url)
         # either 204 No Content (successful delete) or 200 depending on view; accept both
-        self.assertIn(resp.status_code, (status.HTTP_204_NO_CONTENT, status.HTTP_200_OK))
+        self.assertIn(response.status_code, (status.HTTP_204_NO_CONTENT, status.HTTP_200_OK))
         # verify object is gone
         exists = Book.objects.filter(pk=self.book3.pk).exists()
         self.assertFalse(exists)
@@ -164,12 +164,12 @@ class BookAPITestCase(APITestCase):
         except:
             delete_url = url  # maybe the delete uses the detail endpoint
 
-        resp_regular = self.auth_client.delete(delete_url)
+        response_regular = self.auth_client.delete(delete_url)
         # if forbidden for regular user, ensure staff can delete
-        if resp_regular.status_code in (status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED):
-            resp_staff = self.staff_client.delete(delete_url)
-            self.assertIn(resp_staff.status_code, (status.HTTP_204_NO_CONTENT, status.HTTP_200_OK))
+        if response_regular.status_code in (status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED):
+            response_staff = self.staff_client.delete(delete_url)
+            self.assertIn(response_staff.status_code, (status.HTTP_204_NO_CONTENT, status.HTTP_200_OK))
         else:
             # regular user was allowed to delete; assert deletion happened
-            self.assertIn(resp_regular.status_code, (status.HTTP_204_NO_CONTENT, status.HTTP_200_OK))
+            self.assertIn(response_regular.status_code, (status.HTTP_204_NO_CONTENT, status.HTTP_200_OK))
 
