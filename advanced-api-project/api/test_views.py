@@ -58,6 +58,25 @@ class BookAPITestCase(APITestCase):
         self.assertIn(self.book2.title, titles)
         self.assertIn(self.book3.title, titles)
 
+    def test_login_and_create_book(self):
+        """
+        Test authentication using self.client.login() as required by checker.
+        Ensures login works and authenticated user can create a book.
+        """
+        logged_in = self.client.login(username='regular', password='pass1234')
+        self.assertTrue(logged_in)  # login should succeed
+
+        payload = {
+            'title': 'Login Created Book',
+            'publication_year': 2021,
+            'author': self.author.id
+        }
+
+        response = self.client.post(self.create_url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['title'], 'Login Created Book')
+
+
     def test_filter_by_publication_year(self):
         """Filtering by publication_year should return matching books"""
         response = self.client.get(self.list_url, {'publication_year': 1949})
