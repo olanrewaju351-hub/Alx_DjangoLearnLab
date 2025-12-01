@@ -1,0 +1,11 @@
+<!-- blog/templates/blog/post_detail.html -->
+{% extends "blog/base.html" %}
+{% block title %}{{ post.title }} - My Django Blog{% endblock %}
+{% block content %}
+  <article>
+    <h2>{{ post.title }}</h2>
+    <p><small>By {{ post.author.username }} — {{ post.published_date }}</small></p>
+    <div>{{ post.content|linebreaks }}</div>
+  </article>
+{% endblock %}
+
