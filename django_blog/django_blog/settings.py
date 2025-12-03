@@ -29,6 +29,17 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
+# static & media (Path-style BASE_DIR)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [ BASE_DIR / 'static' ]        # project-level static files (optional)
+STATIC_ROOT = BASE_DIR / 'staticfiles'            # for collectstatic (optional)
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'   # or '/'
+LOGIN_URL = '/accounts/login/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,56 +1,38 @@
-# accounts/views.py
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login as auth_login
-from .forms import UserRegistrationForm, ProfileForm
-from django.contrib.auth.views import LoginView, LogoutView
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 
 def register(request):
-    """
-    Register a new user and log them in.
-    """
     if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
+        form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # optionally log in immediately
-            auth_login(request, user)
-            messages.success(request, "Registration successful. You are now logged in.")
-            return redirect('blog:index')
+            messages.success(request, 'Account created successfully. You can now log in.')
+            return redirect('login')  # name used by urls below
     else:
-        form = UserRegistrationForm()
+        form = UserRegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
 
-
 @login_required
-def profile_view(request):
-    """
-    Display profile and allow editing profile fields and email.
-    """
-    user = request.user
-    profile = user.profile
+def profile(request):
     if request.method == 'POST':
-        # update email on user
-        email = request.POST.get('email')
-        if email:
-            user.email = email
-            user.save()
-        # update profile form (bio, profile_photo)
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Profile updated.")
-            return redirect('accounts:profile')
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(
+            request.POST, request.FILES, instance=request.user.profile
+        )
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, 'Your profile has been updated.')
+            return redirect('profile')
     else:
-        form = ProfileForm(instance=profile)
-    return render(request, 'accounts/profile.html', {'form': form, 'user': user})
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=request.user.profile)
 
-
-# Optionally subclass login/logout views only if you want to set templates
-class MyLoginView(LoginView):
-    template_name = 'accounts/login.html'
-
-class MyLogoutView(LogoutView):
-    template_name = 'accounts/logged_out.html'
+    context = {
+        'u_form': u_form,
+        'p_form': p_form
+    }
+    return render(request, 'accounts/profile.html', context)
 
