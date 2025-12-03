@@ -1,0 +1,22 @@
+{% extends 'blog/base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<h2>Your Profile</h2>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <label>Username: {{ user.username }}</label><br>
+  <label>Email:</label><br>
+  <input type="email" name="email" value="{{ user.email }}"><br><br>
+
+  {{ form.as_p }}
+
+  <button type="submit">Save</button>
+</form>
+
+{% if user.profile.profile_photo %}
+  <h4>Current photo</h4>
+  <img src="{{ user.profile.profile_photo.url }}" alt="photo" style="max-width:200px">
+{% endif %}
+{% endblock %}
+

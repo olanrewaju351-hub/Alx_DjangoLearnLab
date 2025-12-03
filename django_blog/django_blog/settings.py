@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog',
+    'accounts',
 ]
 
 
@@ -62,18 +63,13 @@ WSGI_APPLICATION = 'django_blog.wsgi.application'
 
 
 # Database
+# Use SQLite for local development (no DB server needed)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django_blog',
-        'USER': 'postgres',
-        'PASSWORD': 'your_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -102,12 +98,18 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 
-# additional static files directories for development (optional)
-# you can keep this if you have a "blog/static" folder in your project
+# Additional static files directories for development
 STATICFILES_DIRS = [
     BASE_DIR / 'blog' / 'static',
 ]
 
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Authentication redirects
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
