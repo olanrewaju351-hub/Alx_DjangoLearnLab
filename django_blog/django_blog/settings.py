@@ -15,31 +15,38 @@ SECRET_KEY = 'django-insecure-ke3)23^fi2bh@bm4r9cf7fqta^)4*f!l!2i!$8w7#_+p*q!az!
 DEBUG = True
 ALLOWED_HOSTS = []
 
+# settings.py (use Path-style BASE_DIR)
+STATIC_URL = '/static/'
+
+# Project-level static dir (development)
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',          # optional: project-level static (css/site.css)
+]
+
+# For collectstatic (production)
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # optional
+
+# Media (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Auth redirects
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
+
 
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.staticfiles',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'blog',
     'accounts',
 ]
-
-# static & media (Path-style BASE_DIR)
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [ BASE_DIR / 'static' ]        # project-level static files (optional)
-STATIC_ROOT = BASE_DIR / 'staticfiles'            # for collectstatic (optional)
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'   # or '/'
-LOGIN_URL = '/accounts/login/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
