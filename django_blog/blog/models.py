@@ -1,25 +1,32 @@
 # blog/models.py
 from django.db import models
-from django.conf import settings
 from django.contrib.auth.models import User
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Post(models.Model):
-    """
-    Blog post model.
-    - title: short text title of the post
-    - content: full body text
-    - published_date: auto set when created
-    - author: FK to the user who created it
-    """
     title = models.CharField(max_length=200)
     content = models.TextField()
-    published_date = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
-
-    class Meta:
-        ordering = ['-published_date']  # newest first
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    published_date = models.DateTimeField(null=True, blank=True)  # add this
 
     def __str__(self):
         return self.title
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username} Profile"
+
+# Optional: automatically create/update Profile when User is saved
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    instance.profile.save()
 
