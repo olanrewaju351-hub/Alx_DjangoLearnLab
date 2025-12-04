@@ -11,6 +11,15 @@ from django.utils import timezone
 from .models import Post, Comment  # make sure Comment model exists
 
 
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/posts_by_tag.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        tag_slug = self.kwargs.get('tag_slug')
+        return Post.objects.filter(tags__slug__iexact=tag_slug)
+
 class TagPostListView(ListView):
     """
     Shows posts for a given tag name from the URL: /tags/<tag_name>/
