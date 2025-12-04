@@ -8,6 +8,10 @@
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     {% block extra_head %}{% endblock %}
+    <form method="get" action="{% url 'post-search' %}" style="display:inline;">
+    <input type="text" name="q" placeholder="Search posts..." value="{{ request.GET.q|default:'' }}">
+    <button type="submit">Search</button>
+</form>
 </head>
 <body>
     <header>

@@ -7,7 +7,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ['author', 'published_date']
     search_fields = ['title', 'content']
 
-admin.site.register(Post, PostAdmin)
+admin.site.register(Post, PostAdmin, Tag)
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):

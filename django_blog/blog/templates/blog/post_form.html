@@ -8,4 +8,6 @@
     <button type="submit">{% if form.instance.pk %}Update{% else %}Create{% endif %}</button>
 </form>
 {% endblock %}
+<label for="id_tags">Tags (comma-separated)</label>
+{{ form.tags }}
 

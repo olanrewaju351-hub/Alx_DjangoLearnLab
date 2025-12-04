@@ -5,9 +5,12 @@ from .models import Post
 from .models import Comment
 
 class PostForm(forms.ModelForm):
+    # comma-separated tags input for simplicity
+    tags = forms.CharField(required=False, help_text="Enter comma-separated tags (e.g. django,python)")
+
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'tags']
 
 class CommentForm(forms.ModelForm):
     content = forms.CharField(widget=forms.Textarea(attrs={'rows':3}), label='')

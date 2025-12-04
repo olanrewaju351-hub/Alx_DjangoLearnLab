@@ -1,0 +1,17 @@
+{% extends "blog/base.html" %}
+{% block content %}
+  <h1>Search results for "{{ q }}"</h1>
+  {% if posts %}
+    <ul>
+      {% for post in posts %}
+        <li><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if is_paginated %}
+      <!-- paginate controls -->
+    {% endif %}
+  {% else %}
+    <p>No posts found.</p>
+  {% endif %}
+{% endblock %}
+
