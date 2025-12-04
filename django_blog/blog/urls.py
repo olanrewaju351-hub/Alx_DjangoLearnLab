@@ -1,16 +1,14 @@
 from django.urls import path
-from .views import (
-    PostListView, PostDetailView,
-    PostCreateView, PostUpdateView,
-    PostDeleteView
-)
+from . import views   # <- important!
 
 urlpatterns = [
-    path("", PostListView.as_view(), name="home"),
-    path("post/<int:pk>/", PostDetailView.as_view(), name="post-detail"),
-    path("post/new/", PostCreateView.as_view(), name="post-create"),
-    path("post/<int:pk>/edit/", PostUpdateView.as_view(), name="post-update"),
-    path("post/<int:pk>/delete/", PostDeleteView.as_view(), name="post-delete"),
-    path("post/<int:pk>/update/", PostUpdateView.as_view(), name="post-update"),
+    path("", views.PostListView.as_view(), name="home"),
+    path("post/<int:pk>/", views.PostDetailView.as_view(), name="post-detail"),
+    path("post/new/", views.PostCreateView.as_view(), name="post-create"),
+    path("post/<int:pk>/update/", views.PostUpdateView.as_view(), name="post-update"),
+    path("post/<int:pk>/delete/", views.PostDeleteView.as_view(), name="post-delete"),
+
+    # Comment creation (ensure CommentCreateView exists in blog/views.py)
+    path("posts/<int:post_pk>/comments/new/", views.CommentCreateView.as_view(), name="comment-create"),
 ]
 
