@@ -26,8 +26,7 @@ class TagPostListView(ListView):
 
     def get_queryset(self):
         tag = self.kwargs.get("tag_name", "").strip()
-        if not tag:
-            return Post.objects.none().order_by("-created_at")
+            return Post.objects.filter(tags__name__icontains=tag_name)
 
         # Try the most common pattern first: Post has a M2M Tag model (tags__name)
         qs = Post.objects.filter(tags__name__iexact=tag).order_by("-created_at")
