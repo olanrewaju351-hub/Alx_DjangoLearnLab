@@ -17,29 +17,11 @@ ALLOWED_HOSTS = []
 
 # settings.py (use Path-style BASE_DIR)
 # STATIC + MEDIA
-# === STATIC/MEDIA block replaced by fix ===
 STATIC_URL = '/static/'
-# (replaced by canonical STATIC/MEDIA block)
+STATICFILES_DIRS = [ BASE_DIR / 'static' ]   # project-level static folder
+STATIC_ROOT = BASE_DIR / 'staticfiles'       # optional for collectstatic
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = '/static/'
-
-# Development-only: project-level static folder(s)
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',          # project-level static (recommended)
-    BASE_DIR / 'blog' / 'static', # optional: keep if you use blog/static
-]
-
-# Where collectstatic will collect files for production
-STATIC_ROOT = BASE_DIR / 'staticfiles'   # optional for deployment
-
-# Media (user-uploaded files)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # AUTH redirects
