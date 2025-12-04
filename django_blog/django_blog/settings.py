@@ -16,24 +16,35 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # settings.py (use Path-style BASE_DIR)
+# STATIC + MEDIA
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [ BASE_DIR / 'static' ]   # project-level static folder
+STATIC_ROOT = BASE_DIR / 'staticfiles'       # optional for collectstatic
 
-# Project-level static dir (development)
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',          # optional: project-level static (css/site.css)
-]
-
-# For collectstatic (production)
-STATIC_ROOT = BASE_DIR / 'staticfiles'   # optional
-
-# Media (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Auth redirects
+# TEMPLATES (ensure APP_DIRS=True)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [ BASE_DIR / 'templates' ],  # optional project-level templates
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+# AUTH redirects
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
-
+LOGIN_URL = '/accounts/login/'
 
 # Application definition
 

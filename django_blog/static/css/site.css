@@ -1,0 +1,5 @@
+/* site.css - minimal styles for login/register/profile */
+body { font-family: Arial, sans-serif; margin: 20px; }
+nav a { margin-right: 12px; text-decoration: none; }
+.messages { list-style: none; padding: 0; }
+.messages li { margin-bottom: 8px; }
