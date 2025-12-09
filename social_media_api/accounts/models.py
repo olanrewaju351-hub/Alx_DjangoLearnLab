@@ -1,47 +1,30 @@
 # accounts/models.py
-from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import PermissionsMixin, Group, Permission
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class MyUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("Email must be set")
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
-        return self.create_user(email, password, **extra_fields)
-
-class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+class User(AbstractUser):
+    """
+    Custom user model that extends Django's AbstractUser.
+    - Keeps username/email/password/permissions behavior.
+    - Adds profile_picture, bio and followers relationship.
+    """
     bio = models.TextField(blank=True, null=True)
-
-
-    # If you declare groups/user_permissions explicitly, give unique related_name to avoid clashes:
-    groups = models.ManyToManyField(
-        Group, related_name="accounts_user_set", blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        Permission, related_name="accounts_user_permissions_set", blank=True
+    profile_picture = models.ImageField(
+        upload_to="profile_pics/%Y/%m/%d/",
+        blank=True,
+        null=True
     )
 
-    objects = MyUserManager()
-
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []  # e.g., ['first_name'] if you want them required for createsuperuser
+    # followers: users who follow this user.
+    # using symmetrical=False so "following" and "followers" are directional.
+    followers = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        related_name="following",
+        blank=True
+    )
 
     def __str__(self):
-        return self.email
+        # prefer email display if available, else username
+        return self.email if getattr(self, "email", None) else self.username
 

@@ -11,20 +11,16 @@ def _model_field_names(model):
 USER_FIELDS = _model_field_names(User)
 
 
+# ensure 'bio' and 'profile_picture' are allowed on serializer fields
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for reading & updating the current user.
-    Includes 'bio' if the model has it.
-    """
     class Meta:
         model = User
-        # Always try to include id; include username/email/bio only if they exist
-        fields = tuple(sorted(set(('id', 'username', 'email', 'bio')) & USER_FIELDS))
+        fields = ('id', 'username', 'email', 'bio', 'profile_picture')
         extra_kwargs = {
-            'email': {'required': False},
-            'username': {'required': False},
-            'bio': {'required': False, 'allow_blank': True}
+            'bio': {'required': False, 'allow_blank': True},
+            'profile_picture': {'required': False}
         }
+
 
 
 class RegisterSerializer(serializers.ModelSerializer):
