@@ -13,7 +13,7 @@ class SmallResultsSetPagination(PageNumberPagination):
 
 # Post viewset
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.select_related('author').prefetch_related('comments').all()
+    queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     pagination_class = SmallResultsSetPagination
@@ -27,7 +27,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
 # Comment viewset
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.select_related('author', 'post').all()
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     pagination_class = SmallResultsSetPagination
@@ -40,3 +40,21 @@ class CommentViewSet(viewsets.ModelViewSet):
         # author is logged-in user; client should send 'post' id in payload
         serializer.save(author=self.request.user)
 
+class PostListCreateView(generics.ListCreateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+
+class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+
+class CommentListCreateView(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+
+class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
