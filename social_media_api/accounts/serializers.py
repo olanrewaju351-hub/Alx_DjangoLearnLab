@@ -29,3 +29,12 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serialize basic user info."""
+    class Meta:
+        model = User
+        # adapt fields to your user model
+        fields = ("id", "username", "email",)
+        read_only_fields = ("id", "username")
+

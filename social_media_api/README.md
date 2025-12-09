@@ -18,3 +18,24 @@ Endpoints:
 Auth:
 - Use Token auth: set header "Authorization: Token <token_key>"
 
+Posts & Comments API
+--------------------
+Base path: /api/
+
+Posts:
+- GET /api/posts/         -> list (supports ?search=, ?ordering=, pagination)
+- POST /api/posts/        -> create (auth required)
+- GET /api/posts/{id}/    -> retrieve (includes nested comments)
+- PATCH/PUT /api/posts/{id}/ -> update (author only)
+- DELETE /api/posts/{id}/ -> delete (author only)
+
+Comments:
+- GET /api/comments/      -> list
+- POST /api/comments/     -> create (auth required; payload must include "post" id)
+- GET /api/comments/{id}/
+- PATCH/PUT /api/comments/{id}/ -> update (author only)
+- DELETE /api/comments/{id}/ -> delete (author only)
+
+Auth:
+- Use Token auth: Add header "Authorization: Token <key>"
+
