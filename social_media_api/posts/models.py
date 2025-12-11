@@ -1,11 +1,15 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 from django.urls import reverse
 
 User = settings.AUTH_USER_MODEL  # usually 'accounts.User' or 'auth.User'
 
 class Post(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='posts_posts'  # changed to be unique
+    )
     title = models.CharField(max_length=255)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -20,9 +24,14 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('post-detail', kwargs={'pk': self.pk})
 
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments_posts'  # also make unique to avoid conflicts
+    )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

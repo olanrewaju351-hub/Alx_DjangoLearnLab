@@ -39,3 +39,16 @@ Comments:
 Auth:
 - Use Token auth: Add header "Authorization: Token <key>"
 
+Follow & Feed
+-------------
+Endpoints (authenticated: include header "Authorization: Token <token>"):
+
+- POST /api/accounts/follow/<user_id>/    -> follow a user
+- POST /api/accounts/unfollow/<user_id>/  -> unfollow a user
+- GET  /api/accounts/following/           -> list users you follow
+- GET  /api/feed/                         -> paginated posts from users you follow (newest first)
+
+Notes:
+- A follow relationship is modeled via a many-to-many field: followers (related_name='following').
+- Feed is paginated (default page_size=10). Use ?page=<n> to navigate.
+

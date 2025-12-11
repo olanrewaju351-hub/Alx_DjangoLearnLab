@@ -1,17 +1,26 @@
 # accounts/views.py
-from rest_framework import serializers
 from django.contrib.auth import authenticate, get_user_model
-from rest_framework import generics, permissions
-from django.contrib.auth import get_user_model
-from rest_framework import status
+from django.shortcuts import get_object_or_404
+
+from rest_framework import generics, permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .serializers import RegisterSerializer, UserSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
+
+from .serializers import (
+    RegisterSerializer,
+    UserSerializer,
+    MiniUserSerializer,
+    PostSerializer,
+)
+from .models import Post
 
 User = get_user_model()
+
 
 class CustomAuthTokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=False, allow_blank=True)
@@ -82,24 +91,66 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
-    authentication_classes = []
+    authentication_classes = []  # allow anonymous registration
 
     def post(self, request, *args, **kwargs):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            token, _ = Token.objects.get_or_create(user=user)
-            resp = {
-                "id": getattr(user, "id", None),
-                "token": token.key,
-            }
-            if hasattr(user, "email"):
-                resp["email"] = getattr(user, "email")
-            if hasattr(user, "username"):
-                resp["username"] = getattr(user, "username")
-            return Response(resp, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token, _ = Token.objects.get_or_create(user=user)
+        resp = {
+            "id": getattr(user, "id", None),
+            "token": token.key,
+        }
+        if hasattr(user, "email"):
+            resp["email"] = getattr(user, "email")
+        if hasattr(user, "username"):
+            resp["username"] = getattr(user, "username")
+        return Response(resp, status=status.HTTP_201_CREATED)
 
+
+class FeedPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+
+
+def _get_following_relation(user):
+    """
+    Return a manager representing the users that `user` follows.
+    Handles two model shapes:
+    1) user.following (related_name from followers M2M)
+    2) user.following field defined directly
+    """
+    # Preferred: user.following exists
+    if hasattr(user, 'following'):
+        return user.following
+
+    # If only 'followers' exists but related_name='following' on the other side, try access:
+    if hasattr(user, 'followers'):
+        # If there is a reverse related name that exposes following, try it:
+        if hasattr(user, 'following'):
+            return user.following
+
+    # Last resort: nothing provided
+    raise AttributeError("User model does not expose 'following' or 'followers' relationships.")
+
+
+class FeedView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        try:
+            follows_qs = _get_following_relation(user).all()
+        except AttributeError:
+            return Response({'detail': 'Follow relation not configured.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Query posts for those authors
+        posts_qs = Post.objects.filter(author__in=follows_qs).order_by('-created_at')
+        paginator = FeedPagination()
+        page = paginator.paginate_queryset(posts_qs, request)
+        serializer = PostSerializer(page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):
@@ -113,3 +164,63 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+# Follow / unfollow endpoints -------------------------------------------------
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow_user(request, user_id):
+    """
+    Follow the user with id=user_id.
+    Requesting user cannot follow themselves.
+    Returns MiniUserSerializer of target user.
+    """
+    me = request.user
+    target = get_object_or_404(User, pk=user_id)
+    if target == me:
+        return Response({'detail': "Cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        following_rel = _get_following_relation(me)
+    except AttributeError:
+        return Response({'detail': "Follow relation not configured on User model."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    following_rel.add(target)
+    return Response(MiniUserSerializer(target).data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def unfollow_user(request, user_id):
+    """
+    Unfollow the user with id=user_id.
+    """
+    me = request.user
+    target = get_object_or_404(User, pk=user_id)
+    if target == me:
+        return Response({'detail': "Cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        following_rel = _get_following_relation(me)
+    except AttributeError:
+        return Response({'detail': "Follow relation not configured on User model."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    following_rel.remove(target)
+    return Response(MiniUserSerializer(target).data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_following_list(request):
+    """
+    Return list of users the request.user is following.
+    """
+    try:
+        following_rel = _get_following_relation(request.user)
+    except AttributeError:
+        return Response({'detail': "Follow relation not configured."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    qs = following_rel.all()
+    data = MiniUserSerializer(qs, many=True).data
+    return Response(data, status=status.HTTP_200_OK)
+

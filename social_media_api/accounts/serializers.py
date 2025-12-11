@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from .models import Post
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
@@ -38,3 +39,19 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "email",)
         read_only_fields = ("id", "username")
 
+class FollowActionSerializer(serializers.Serializer):
+    target_username = serializers.CharField()
+    action = serializers.ChoiceField(choices=['follow','unfollow','toggle'], default='toggle')
+
+class MiniUserSerializer(serializers.ModelSerializer):
+    followers_count = serializers.IntegerField(source='followers.count', read_only=True)
+    following_count = serializers.IntegerField(source='following.count', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'followers_count', 'following_count']
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = "__all__"
