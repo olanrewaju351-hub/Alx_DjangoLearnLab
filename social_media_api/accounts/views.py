@@ -1,7 +1,6 @@
 # accounts/views.py
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
-
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +9,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
+from accounts.models import User
 
 from .serializers import (
     RegisterSerializer,
@@ -165,6 +165,15 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+
+class FollowingListView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        following = user.following.all()
+        data = [{"id": u.id, "username": u.username} for u in following]
+        return Response(data)
 
 # Follow / unfollow endpoints -------------------------------------------------
 @api_view(['POST'])
