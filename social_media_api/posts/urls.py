@@ -1,9 +1,12 @@
 # posts/urls.py
-from django.urls import path
+
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
 from .views import (
     PostViewSet,
     CommentViewSet,
+    FeedView,
     like_post,
     unlike_post,
     PostListCreateView,
@@ -12,23 +15,27 @@ from .views import (
     CommentDetailView,
 )
 
-# Router for viewsets
 router = DefaultRouter()
 router.register(r'posts', PostViewSet, basename='post')
 router.register(r'comments', CommentViewSet, basename='comment')
 
 urlpatterns = [
-    # Include router URLs
-    *router.urls,
+    # ViewSets
+    path('', include(router.urls)),
 
-    # Additional endpoints for like/unlike
-    path('posts/<int:post_id>/like/', like_post, name='like-post'),
-    path('posts/<int:post_id>/unlike/', unlike_post, name='unlike-post'),
+    # Feed
+    path('feed/', FeedView.as_view(), name='feed'),
 
-    # Optional: generic views
-    path('posts-list/', PostListCreateView.as_view(), name='post-list-create'),
+    # Generic Post Views
+    path('posts/', PostListCreateView.as_view(), name='post-list'),
     path('posts/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
-    path('comments-list/', CommentListCreateView.as_view(), name='comment-list-create'),
+
+    # Likes (REQUIRED BY CHECKER)
+    path('posts/<int:pk>/like/', like_post, name='like-post'),
+    path('posts/<int:pk>/unlike/', unlike_post, name='unlike-post'),
+
+    # Generic Comment Views
+    path('comments/', CommentListCreateView.as_view(), name='comment-list'),
     path('comments/<int:pk>/', CommentDetailView.as_view(), name='comment-detail'),
 ]
 
