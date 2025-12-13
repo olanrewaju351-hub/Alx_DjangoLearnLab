@@ -142,6 +142,8 @@ REST_FRAMEWORK = {
 # for development only
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PORT = os.environ.get("PORT", 8000)  # default to 8000 if not set
+
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
