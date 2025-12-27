@@ -1,8 +1,12 @@
 from django.contrib import admin
-from accounts.models import CustomUser
 from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser, Book
 
-# Minimal admin registration so the grader finds the line
 class CustomUserAdmin(UserAdmin):
-    pass
+    model = CustomUser
+    list_display = ('username', 'email', 'is_staff', 'is_active')
+
+admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(Book)
+
 
